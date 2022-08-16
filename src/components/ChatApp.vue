@@ -150,6 +150,7 @@ export default {
 	padding: 15px 20px;
 	width: 100%;
 	border-bottom: 1px solid $border-color;
+	max-height: 85px;
 
 	&:hover {
 		cursor: pointer;
@@ -173,12 +174,18 @@ export default {
 	&__title {
 		display: flex;
 		justify-content: space-between;
+		margin-bottom: 10px;
 	}
 
 	&__msg {
 		flex-grow: 1;
 		display: flex;
+		max-width: 293px;
 		align-items: center;
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
 	}
 
 	&__name {

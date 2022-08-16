@@ -11,12 +11,12 @@
 					class="avatar__img"
 				/>
 			</div>
-			<span class="rght-prt__name">{{ getMessages.name }}</span>
+			<span class="rght-prt__name"></span>
 		</div>
 		<div class="rght-prt__body">
 			<div
 				class="msg-item"
-				v-for="msg in getMessages"
+				v-for="msg in getMessages.slice().sort((a, b) => a.date - b.date)"
 				:key="msg.date"
 				:class="{ 'msg-item--in': msg.in }"
 			>
@@ -35,7 +35,7 @@
 		</div>
 		<div class="rght-prt__footer">
 			<form class="form" @submit.prevent="sendMsg()" @keydown.enter="sendMsg()">
-				<textarea class="form__input" v-model="newMsg" />
+				<textarea class="form__input" v-model="newMsg" autofocus />
 				<button type="submit" class="form__btn">
 					<i class="fa fa-solid fa-paper-plane form__icon"></i>
 				</button>
@@ -48,18 +48,17 @@
 import { mapGetters, mapMutations } from 'vuex';
 
 export default {
+	props: ['chatId'],
 	data() {
 		return {
 			newMsg: '',
+			id: '',
 		};
 	},
-	props: ['chatId'],
 	computed: {
-		...mapGetters(['getChatHistory']),
+		...mapGetters(['getMessagesById']),
 		getMessages() {
-			return this.getChatHistory
-				.filter((el) => el.userId == this.chatId)[0]
-				.msgHistory.sort((a, b) => a.date - b.date);
+			return this.getMessagesById(this.id);
 		},
 	},
 	methods: {
@@ -67,9 +66,13 @@ export default {
 		setNewMsg(value, id, isIn) {
 			this.addNewMsg({ date: Date.now(), msg: value, in: isIn, userId: id });
 		},
-		sendMsg() {
-			this.setNewMsg(this.newMsg, this.chatId, false);
-			this.newMsg = '';
+		async sendMsg() {
+			if (this.newMsg.trim()) {
+				this.setNewMsg(this.newMsg.trim(), this.chatId, false);
+				this.newMsg = '';
+				const msg = await this.fetchChuckJoke();
+				this.setNewMsg(msg, this.chatId, true);
+			}
 		},
 		dateConverter(milliseconds) {
 			let d = new Date(milliseconds);
@@ -86,9 +89,23 @@ export default {
 
 			msgBody.scrollTop = msgBody.scrollHeight;
 		},
+		async fetchChuckJoke() {
+			const res = await fetch('https://api.chucknorris.io/jokes/random');
+			const data = await res.json();
+			return await data.value;
+		},
 	},
 	updated() {
 		this.scrollToBot();
+		document.querySelector('.form__input').focus();
+	},
+	watch: {
+		chatId: {
+			immediate: true,
+			handler(newVal) {
+				this.id = newVal;
+			},
+		},
 	},
 };
 </script>

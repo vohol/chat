@@ -17,8 +17,6 @@ export default {
 			state.chatHistory = chatHistory;
 		},
 		addNewMsg(state, msgItem) {
-			let result;
-
 			state.chatHistory.forEach((el) => {
 				if (el.userId == msgItem.userId) {
 					el.msgHistory.push({
@@ -27,17 +25,20 @@ export default {
 						in: msgItem.in,
 					});
 
-					result = true;
+					return;
 				}
-
-				if (result) return;
 			});
+
+			localStorage.setItem('history', JSON.stringify(state.chatHistory));
 		},
 	},
 	state: {
 		chatHistory: [],
 	},
 	getters: {
+		getMessagesById: (state) => (id) => {
+			return state.chatHistory.filter((el) => el.userId == id)[0].msgHistory;
+		},
 		getChatHistory(state) {
 			return state.chatHistory.sort((a, b) => {
 				return getLastMsg(b.msgHistory).date - getLastMsg(a.msgHistory).date;
