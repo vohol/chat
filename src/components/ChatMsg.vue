@@ -4,6 +4,9 @@
 	</div>
 	<div class="rght-prt" v-else>
 		<div class="rght-prt__header">
+			<button @click="$emit('back')" class="back-btn">
+				<i class="fa fa-solid fa-chevron-left"></i>
+			</button>
 			<div class="avatar">
 				<img
 					:src="`https://i.pravatar.cc/54?img=${chatId}`"
@@ -11,14 +14,14 @@
 					class="avatar__img"
 				/>
 			</div>
-			<span class="rght-prt__name"></span>
+			<span class="rght-prt__name">{{ getNameById(id) }}</span>
 		</div>
 		<div class="rght-prt__body">
 			<div
 				class="msg-item"
 				v-for="msg in getMessages.slice().sort((a, b) => a.date - b.date)"
 				:key="msg.date"
-				:class="{ 'msg-item--in': msg.in }"
+				:class="{ 'msg-item--out': !msg.in }"
 			>
 				<div class="avatar msg-item__img" v-if="msg.in">
 					<img
@@ -35,7 +38,7 @@
 		</div>
 		<div class="rght-prt__footer">
 			<form class="form" @submit.prevent="sendMsg()" @keydown.enter="sendMsg()">
-				<textarea class="form__input" v-model="newMsg" autofocus />
+				<input class="form__input" v-model="newMsg" autofocus />
 				<button type="submit" class="form__btn">
 					<i class="fa fa-solid fa-paper-plane form__icon"></i>
 				</button>
@@ -56,22 +59,32 @@ export default {
 		};
 	},
 	computed: {
-		...mapGetters(['getMessagesById']),
+		...mapGetters(['getMessagesById', 'getNameById']),
 		getMessages() {
 			return this.getMessagesById(this.id);
 		},
 	},
 	methods: {
-		...mapMutations(['addNewMsg']),
-		setNewMsg(value, id, isIn) {
-			this.addNewMsg({ date: Date.now(), msg: value, in: isIn, userId: id });
+		...mapMutations(['addNewMsg', 'readNewMessages']),
+		setNewMsg(value, id, isIn, isNew) {
+			this.addNewMsg({
+				date: Date.now(),
+				msg: value,
+				in: isIn,
+				userId: id,
+				new: isNew,
+			});
 		},
 		async sendMsg() {
 			if (this.newMsg.trim()) {
-				this.setNewMsg(this.newMsg.trim(), this.chatId, false);
+				this.setNewMsg(this.newMsg.trim(), this.chatId, false, false);
 				this.newMsg = '';
 				const msg = await this.fetchChuckJoke();
-				this.setNewMsg(msg, this.chatId, true);
+				const tempId = this.chatId;
+
+				setTimeout(() => {
+					this.setNewMsg(msg, tempId, true, true);
+				}, 10000);
 			}
 		},
 		dateConverter(milliseconds) {
@@ -86,7 +99,6 @@ export default {
 		},
 		scrollToBot() {
 			let msgBody = document.querySelector('.rght-prt__body');
-
 			msgBody.scrollTop = msgBody.scrollHeight;
 		},
 		async fetchChuckJoke() {
@@ -94,15 +106,21 @@ export default {
 			const data = await res.json();
 			return await data.value;
 		},
+		goBack() {
+			this.$emit('goBack');
+		},
 	},
 	updated() {
-		this.scrollToBot();
-		document.querySelector('.form__input').focus();
+		if (this.chatId) {
+			this.scrollToBot();
+			document.querySelector('.form__input').focus();
+		}
 	},
 	watch: {
 		chatId: {
 			immediate: true,
 			handler(newVal) {
+				this.readNewMessages(this.chatId);
 				this.id = newVal;
 			},
 		},
@@ -111,6 +129,25 @@ export default {
 </script>
 
 <style lang="scss">
+.back-btn {
+	display: none;
+}
+
+@media screen and (max-width: 760px) {
+	.back-btn {
+		display: block;
+		padding: 10px 14px;
+		background: $border-color;
+		border-radius: 10px;
+		margin-right: 5px;
+
+		& .fa {
+			font-size: 30px;
+			color: $dark-back;
+		}
+	}
+}
+
 .form {
 	display: flex;
 	height: 62px;
@@ -199,11 +236,7 @@ export default {
 .msg-item {
 	display: flex;
 	margin-bottom: 20px;
-	justify-content: flex-end;
-
-	&--in {
-		justify-content: flex-start;
-	}
+	justify-content: flex-start;
 
 	&__img {
 		margin-right: 12px;
@@ -225,6 +258,24 @@ export default {
 	&__date {
 		color: gray;
 		font-size: 12px;
+		margin-left: 16px;
+	}
+
+	&--out {
+		justify-content: flex-end;
+	}
+
+	&--out &__date {
+		text-align: right;
+		margin-left: 0;
+		margin-right: 16px;
+	}
+
+	&--out &__msg {
+		background: $border-color;
+		color: black;
+		text-align: right;
+		justify-content: flex-end;
 	}
 }
 </style>

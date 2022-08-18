@@ -23,7 +23,19 @@ export default {
 						date: msgItem.date,
 						msg: msgItem.msg,
 						in: msgItem.in,
+						new: msgItem.new,
 					});
+
+					return;
+				}
+			});
+
+			localStorage.setItem('history', JSON.stringify(state.chatHistory));
+		},
+		readNewMessages(state, id) {
+			state.chatHistory.forEach((el) => {
+				if (el.userId == id) {
+					el.msgHistory.map((el) => (el.new = false));
 
 					return;
 				}
@@ -43,6 +55,9 @@ export default {
 			return state.chatHistory.sort((a, b) => {
 				return getLastMsg(b.msgHistory).date - getLastMsg(a.msgHistory).date;
 			});
+		},
+		getNameById: (state) => (id) => {
+			return state.chatHistory.filter((el) => el.userId == id)[0].name;
 		},
 	},
 };

@@ -21,5 +21,6 @@ export default {
 #app {
 	font-family: 'Roboto', sans-serif;
 	width: 100%;
+	line-height: 1.1;
 }
 </style>
