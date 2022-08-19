@@ -32,11 +32,10 @@ export default {
 			callBackUserId: '',
 		};
 	},
+	props: ['activeChatId'],
 	computed: {
 		...mapGetters(['getChatHistory']),
 		getNewMessages() {
-			// return this.newMessages();
-			//to do: need back this shit
 			return this.newMessages().filter((el) => el.date >= this.startTime);
 		},
 	},
@@ -79,11 +78,13 @@ export default {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+	padding-left: 4px;
 }
 
 .notif-item {
 	padding: 15px 15px;
 	max-width: 400px;
+	width: 100%;
 	max-height: 100px;
 	background: $dark-back;
 	border-radius: 8px;
@@ -122,6 +123,12 @@ export default {
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		padding-right: 20px;
+	}
+}
+
+@media screen and (min-width: 410px) {
+	.notif-item {
+		width: 400px;
 	}
 }
 </style>

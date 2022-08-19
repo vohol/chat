@@ -13,8 +13,8 @@ export default {
 	computed: {
 		...mapGetters(['getChatHistory']),
 		getFilteredChatHistory() {
-			if (this.searchRequest.length >= 2) {
-				let regExp = new RegExp(this.searchRequest, 'gi');
+			if (this.searchRequest.trim().length >= 2) {
+				let regExp = new RegExp(this.searchRequest.trim(), 'gi');
 
 				return this.getChatHistory.filter((el) => regExp.test(el.name));
 			} else {
@@ -112,7 +112,10 @@ export default {
 			:class="{ visible: activeChatId }"
 			@back="activeChatId = ''"
 		/>
-		<NotificationsPopUp @openChat="changeId($event)" />
+		<NotificationsPopUp
+			@openChat="changeId($event)"
+			:activeChatId="activeChatId"
+		/>
 	</div>
 </template>
 

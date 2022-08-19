@@ -37,8 +37,15 @@
 			</div>
 		</div>
 		<div class="rght-prt__footer">
-			<form class="form" @submit.prevent="sendMsg()" @keydown.enter="sendMsg()">
-				<input class="form__input" v-model="newMsg" autofocus />
+			<form class="form" @submit.prevent="sendMsg()">
+				<textarea
+					class="form__input"
+					v-model="newMsg"
+					autofocus
+					@keydown.enter.exact.prevent="sendMsg()"
+					@keydown.enter.shift.exact.prevent="newline"
+				/>
+				<p>Enter - send message; Shift + Enter - new line.</p>
 				<button type="submit" class="form__btn">
 					<i class="fa fa-solid fa-paper-plane form__icon"></i>
 				</button>
@@ -66,6 +73,9 @@ export default {
 	},
 	methods: {
 		...mapMutations(['addNewMsg', 'readNewMessages']),
+		newline() {
+			this.newMsg = `${this.newMsg}\n`;
+		},
 		setNewMsg(value, id, isIn, isNew) {
 			this.addNewMsg({
 				date: Date.now(),
@@ -151,25 +161,35 @@ export default {
 .form {
 	display: flex;
 	height: 62px;
-	border-radius: 50px;
+	border-radius: 20px;
+	position: relative;
+
+	p {
+		position: absolute;
+		bottom: -18px;
+		font-size: 10px;
+		color: gray;
+		margin-left: 15px;
+	}
 
 	&__input {
-		border-radius: 50px 0 0 50px;
+		border-radius: 20px 0 0 20px;
 		flex: 92%;
-		padding: 10px 20px;
+		padding: 0 20px;
+		border-top: 10px solid white;
+		border-bottom: 10px solid white;
 		padding-right: 0;
 		font-size: 14px;
 		resize: none;
-		display: flex;
 	}
 
 	&__btn {
 		flex: 8%;
-		border-radius: 0 50px 50px 0;
+		border-radius: 0 20px 20px 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding-right: 10px;
+		padding: 0 12px;
 		background: white;
 	}
 
@@ -196,13 +216,14 @@ export default {
 
 		span {
 			font-weight: 400px;
-			font-size: 28px;
+			font-size: 16px;
 
 			display: block;
-			padding: 15px 30px;
+			padding: 12px 25px;
 			border-radius: 50px;
 			background: $dark-back;
 			color: white;
+			margin: 0 auto;
 		}
 	}
 
@@ -240,6 +261,7 @@ export default {
 
 	&__img {
 		margin-right: 12px;
+		min-width: 54px;
 	}
 
 	&__msg {
@@ -248,9 +270,10 @@ export default {
 		margin-bottom: 12px;
 		display: flex;
 		align-items: center;
-		font-size: 16px;
+		font-size: 14px;
+		line-height: 1.4;
 
-		border-radius: 50px;
+		border-radius: 20px;
 		background: $dark-back;
 		color: white;
 	}
@@ -263,6 +286,11 @@ export default {
 
 	&--out {
 		justify-content: flex-end;
+	}
+	&--out &__body {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
 	}
 
 	&--out &__date {
